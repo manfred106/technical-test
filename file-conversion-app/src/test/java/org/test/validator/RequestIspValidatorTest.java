@@ -7,9 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.springframework.validation.Errors;
 import org.springframework.validation.SimpleErrors;
 import org.test.config.ApplicationConfig;
@@ -17,49 +14,51 @@ import org.test.interceptor.IpGeoLocationResponse;
 
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
-class RequestCountryCodeValidatorTest {
+class RequestIspValidatorTest {
 
     @Spy
     private ApplicationConfig applicationConfig = ApplicationConfig.builder()
-            .blockedCountryCodes(Set.of("CN", "ES", "US"))
+            .blockedIsps(Set.of("AWS", "GCP", "Azure"))
             .build();
 
     @InjectMocks
-    private RequestCountryCodeValidator requestCountryCodeValidator;
+    private RequestIspValidator requestIspValidator;
 
     @Test
     void whenClassIsNotSupported_thenReturnFalse() {
-        assertThat(requestCountryCodeValidator.supports(String.class)).isFalse();
+        assertThat(requestIspValidator.supports(String.class)).isFalse();
     }
 
     @Test
-    void whenCountryCodeIsNotBlocked_thenNoError() {
+    void whenIspIsNotBlocked_thenNoError() {
         // when
-        IpGeoLocationResponse response = getIpGeoLocationResponse("FR");
+        IpGeoLocationResponse response = getIpGeoLocationResponse("valid-isp");
         Errors errors = new SimpleErrors(response);
-        requestCountryCodeValidator.validate(response, errors);
+        requestIspValidator.validate(response, errors);
 
         // then
         assertThat(errors.getAllErrors()).overridingErrorMessage("Errors should be empty").isEmpty();
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CN", "ES", "US"})
-    void whenCountryCodeIsBlocked_thenErrorIsNotEmpty(String countryCode) {
+    @ValueSource(strings = {"AWS", "GCP", "Azure"})
+    void whenIspIsBlocked_thenErrorIsNotEmpty(String isp) {
         // when
-        IpGeoLocationResponse response = getIpGeoLocationResponse(countryCode);
+        IpGeoLocationResponse response = getIpGeoLocationResponse(isp);
         Errors errors = new SimpleErrors(response);
-        requestCountryCodeValidator.validate(response, errors);
+        requestIspValidator.validate(response, errors);
 
         // then
         assertThat(errors.getAllErrors()).overridingErrorMessage("Errors should not be empty").isNotEmpty();
-        assertThat(errors.getAllErrors().get(0).getCode()).isEqualTo("countryCode");
+        assertThat(errors.getAllErrors().get(0).getCode()).isEqualTo("isp");
     }
 
-    private IpGeoLocationResponse getIpGeoLocationResponse(String countryCode) {
+    private IpGeoLocationResponse getIpGeoLocationResponse(String isp) {
         IpGeoLocationResponse response = new IpGeoLocationResponse();
-        response.setCountryCode(countryCode);
+        response.setIsp(isp);
         return response;
     }
 

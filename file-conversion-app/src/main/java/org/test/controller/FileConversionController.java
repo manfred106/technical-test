@@ -1,12 +1,10 @@
 package org.test.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.test.domain.Person;
+import org.test.exception.InvalidFileException;
 import org.test.service.EntryFileService;
 
 @RestController
@@ -31,20 +30,23 @@ public class FileConversionController {
 
     @PostMapping("/convert")
     @JsonView(Person.PublicFields.class)
-    public ResponseEntity<List<Person>> processFile(@RequestParam("file") MultipartFile file,
-                                                    HttpServletRequest request)
+    public ResponseEntity<List<Person>> processFile(@RequestParam("file") MultipartFile file)
             throws IOException {
 
-        if (file.isEmpty() || !StringUtils.getFilenameExtension(file.getOriginalFilename()).equalsIgnoreCase("txt")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if (file.isEmpty()) {
+            throw new InvalidFileException("No file found");
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        if (!"txt".equalsIgnoreCase(fileExtension)) {
+            throw new InvalidFileException(String.format("%s is not a valid file extension", fileExtension));
         }
 
         List<Person> personList = entryFileService.getPersonList(file);
-
         log.debug("Rows of data={}", CollectionUtils.size(personList));
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=outcome.json")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=OutcomeFile.json")
                 .body(personList);
     }
 

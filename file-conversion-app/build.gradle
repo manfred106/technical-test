@@ -17,8 +17,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     implementation 'org.apache.commons:commons-lang3:3.14.0'
     implementation 'commons-io:commons-io:2.16.1'
@@ -27,8 +28,22 @@ dependencies {
     implementation 'com.h2database:h2:2.2.224'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.wiremock:wiremock-standalone:3.7.0'
 }
 
 test {
     useJUnitPlatform()
+    exclude '**/*IntegrationTest*'
+}
+
+def integrationTestTask = tasks.register('integrationTest', Test) {
+    description = 'Run Integration Tests'
+    group = 'verification'
+    useJUnitPlatform()
+    include '**/*IntegrationTest*'
+    shouldRunAfter(tasks.named('test'))
+}
+
+tasks.named('check') {
+    dependsOn(['test', integrationTestTask])
 }

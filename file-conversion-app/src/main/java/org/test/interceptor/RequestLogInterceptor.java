@@ -16,11 +16,11 @@ import org.test.entity.RequestLog;
 import org.test.repository.RequestLogRepository;
 import org.test.util.LocalDateTimeProvider;
 
+import static org.test.interceptor.RequestAttributeConstant.ATTR_REQUEST_LOG;
+
 @Slf4j
 @Component
 public class RequestLogInterceptor implements HandlerInterceptor {
-
-    static final String ATTR_REQUEST_LOG = "request.requestLog";
 
     @Autowired
     private RequestLogRepository requestLogRepository;
@@ -30,8 +30,7 @@ public class RequestLogInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-                             Object handler)
-            throws Exception {
+                             Object handler) {
         RequestLog requestLog = new RequestLog()
                 .withId(UUID.randomUUID())
                 .withRequestIpAddress(request.getRemoteAddr())
@@ -43,22 +42,18 @@ public class RequestLogInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response,
-                           Object handler, ModelAndView modelAndView)
-            throws Exception {
+                           Object handler, ModelAndView modelAndView) {
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-                                Object handler, Exception ex)
-            throws Exception {
+                                Object handler, Exception ex) {
         RequestLog requestLog = (RequestLog) request.getAttribute(ATTR_REQUEST_LOG);
         requestLog = requestLog.withResponseCode(response.getStatus())
                 .withTimeLapsed(ChronoUnit.MILLIS.between(requestLog.getRequestTimestamp(), localDateTimeProvider.getCurrentDateTime()));
 
-        log.info("RequestLogInterceptor afterCompletion requestLog={}", requestLog);
+        log.debug("Going to save requestLog={}", requestLog);
         requestLogRepository.save(requestLog);
     }
 
-
 }
-

@@ -16,6 +16,7 @@ spring:
       max-request-size: 10MB
 
 application:
-  testValue: abc
-  blockedCountryCodes: ["CN", "ES", "US", "HK"]
-  blockedIsps: ["Azure"]
+  geoLocationValidation: true
+  geoLocationUrl: http://ip-api.com/json/
+  blockedCountryCodes: ["CN", "ES", "US"]
+  blockedIsps: ["AWS", "Azure", "GCP"]

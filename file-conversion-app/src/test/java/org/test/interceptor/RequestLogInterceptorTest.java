@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.test.interceptor.RequestLogInterceptor.ATTR_REQUEST_LOG;
+import static org.test.interceptor.RequestAttributeConstant.ATTR_REQUEST_LOG;
 
 @ExtendWith(MockitoExtension.class)
 class RequestLogInterceptorTest {
