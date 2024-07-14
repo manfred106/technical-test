@@ -94,7 +94,7 @@ class IpGeoLocationInterceptorTest {
     }
 
     @Test
-    void whenCountryCodeIsBlocked_thenThrowInvalidIspException() throws Exception {
+    void whenCountryCodeIsBlocked_thenThrowInvalidIspException() {
         // given
         doAnswer(invocation -> {
             Errors errors = errorsArgumentCaptor.getValue();
@@ -112,7 +112,7 @@ class IpGeoLocationInterceptorTest {
     }
 
     @Test
-    void whenIspIsBlocked_thenThrowInvalidIspException() throws Exception {
+    void whenIspIsBlocked_thenThrowInvalidIspException() {
         // given
         doAnswer(invocation -> {
             Errors errors = errorsArgumentCaptor.getValue();

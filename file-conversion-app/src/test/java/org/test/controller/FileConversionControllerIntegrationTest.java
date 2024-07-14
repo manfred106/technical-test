@@ -136,11 +136,25 @@ class FileConversionControllerIntegrationTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"AWS", "Azure", "GCP"})
+    void whenGeoLocationReturnBlockedIsp_thenReturnForbidden(String isp) throws Exception {
+        // given
+        IpGeoLocationResponse ipGeoLocationResponse = DEFAULT_GEO_LOCATION_RESPONSE.withIsp(isp);
+        stubDefaultGeoLocation(ipGeoLocationResponse);
+        MockMultipartFile multipartFile = getValidMultipartFile();
+
+        // when & then
+        performAndAssertResult(multipartFile, HttpStatus.FORBIDDEN_403);
+    }
+
+    @ParameterizedTest
     @MethodSource("provideTestData")
     void whenGeoLocationValidationDisabled_thenReturnOk(String countryCode, String isp) throws Exception {
         // given
         applicationConfig.setGeoLocationValidation(false);
-        IpGeoLocationResponse ipGeoLocationResponse = DEFAULT_GEO_LOCATION_RESPONSE.withCountryCode(countryCode);
+        IpGeoLocationResponse ipGeoLocationResponse = DEFAULT_GEO_LOCATION_RESPONSE
+                .withCountryCode(countryCode)
+                .withIsp(isp);
         stubDefaultGeoLocation(ipGeoLocationResponse);
         MockMultipartFile multipartFile = getValidMultipartFile();
 
@@ -156,20 +170,8 @@ class FileConversionControllerIntegrationTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"AWS", "Azure", "GCP"})
-    void whenGeoLocationReturnBlockedIsp_thenReturnForbidden(String isp) throws Exception {
-        // given
-        IpGeoLocationResponse ipGeoLocationResponse = DEFAULT_GEO_LOCATION_RESPONSE.withIsp(isp);
-        stubDefaultGeoLocation(ipGeoLocationResponse);
-        MockMultipartFile multipartFile = getValidMultipartFile();
-
-        // when & then
-        performAndAssertResult(multipartFile, HttpStatus.FORBIDDEN_403);
-    }
-
     @Test
-    void whenInvalidFileProvided_thenReturnOk() throws Exception {
+    void whenInvalidFileProvided_thenReturnBadRequest() throws Exception {
         // given
         stubDefaultGeoLocation(DEFAULT_GEO_LOCATION_RESPONSE);
         MockMultipartFile multipartFile = getInvalidMultipartFile();

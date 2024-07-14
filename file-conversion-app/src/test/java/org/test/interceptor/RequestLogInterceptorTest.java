@@ -47,7 +47,7 @@ class RequestLogInterceptorTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
 
     @Test
-    void testPreHandle() throws Exception {
+    void testPreHandle() {
         // given
         String requestUri = "/test";
         String remoteAddr = "127.0.0.1";
@@ -70,7 +70,7 @@ class RequestLogInterceptorTest {
     }
 
     @Test
-    public void testAfterCompletion() throws Exception {
+    public void testAfterCompletion() {
         // given
         int statusCode = HttpStatus.OK.value();
         when(localDateTimeProvider.getCurrentDateTime()).thenReturn(NOW);
